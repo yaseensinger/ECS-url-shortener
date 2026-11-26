@@ -2,7 +2,7 @@
 
 FROM python:3.12-slim AS builder
 
-WORKDIR / app
+WORKDIR /app
 
 
 COPY requirements.txt .
@@ -18,7 +18,9 @@ FROM python:3.12-slim AS production
 
 COPY --from=builder /install /usr/local
 
-COPY src/ .src/
+WORKDIR /app
+
+COPY src/ ./src/
 
 # non root user setup 
 RUN useradd --create-home --shell /usr/sbin/nologin appuser \

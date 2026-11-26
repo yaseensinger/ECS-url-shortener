@@ -1,0 +1,32 @@
+services:
+
+  api:
+    build:
+      context: ./app
+    container_name: url-shortener-api
+    ports: 
+      - "8080:8080"
+    networks:
+      - url-shortener
+
+
+  worker:
+    build:
+      context: services/worker
+    container_name: url-shortener-worker
+    networks:
+      - url-shortener
+
+  dashboard:
+    build:
+      context: services/dashboard
+    container_name: url-shortener-dashboard
+    ports:
+      - "8081:8081"
+    networks:
+      - url-shortener
+
+
+networks:
+  url-shortener:
+    driver: bridge
