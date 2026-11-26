@@ -6,14 +6,20 @@ services:
     container_name: url-shortener-api
     ports: 
       - "8080:8080"
+    environment:
+      DATABASE_URL: "postgresql://appuser:localpassword@postgres:5432/url_shortener?sslmode=disable"
     networks:
       - url-shortener
+    
 
 
   worker:
     build:
       context: services/worker
     container_name: url-shortener-worker
+    environment:
+      DATABASE_URL: "postgresql://appuser:localpassword@postgres:5432/url_shortener?sslmode=disable"
+      SQS_QUEUE_URL: http://localstack:4566/queue/us-east-1/000000000000/url-clicks
     networks:
       - url-shortener
 
@@ -23,10 +29,37 @@ services:
     container_name: url-shortener-dashboard
     ports:
       - "8081:8081"
+    environment:
+      DATABASE_URL: "postgresql://appuser:localpassword@postgres:5432/url_shortener?sslmode=disable"
+    networks:
+      - url-shortener
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: url-shortener-postgres
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: url_shortener
+    ports:
+      - "5432:5432"
     networks:
       - url-shortener
 
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: url-shortener-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: us-east-1
+      SQS_ENDPOINT_STRATEGY: path
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+    networks:
+      - url-shortener
+    
 networks:
   url-shortener:
     driver: bridge
